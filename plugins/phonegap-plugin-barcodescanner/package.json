@@ -1,0 +1,119 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "cordova-plugin-barcodescanner-browser-support@^7.1.22",
+        "scope": null,
+        "escapedName": "cordova-plugin-barcodescanner-browser-support",
+        "name": "cordova-plugin-barcodescanner-browser-support",
+        "rawSpec": "^7.1.22",
+        "spec": ">=7.1.22 <8.0.0",
+        "type": "range"
+      },
+      "/Users/aprigent/GoogleD/DONNEES/DocumentsPro/2019-2020/Cours/MasterIcone/M2/RechercheEtMobilite/TEST_APPLI/TPQuizz/node_modules"
+    ]
+  ],
+  "_from": "cordova-plugin-barcodescanner-browser-support@>=7.1.22 <8.0.0",
+  "_id": "cordova-plugin-barcodescanner-browser-support@7.1.22",
+  "_inCache": true,
+  "_location": "/cordova-plugin-barcodescanner-browser-support",
+  "_nodeVersion": "8.9.4",
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages",
+    "tmp": "tmp/cordova-plugin-barcodescanner-browser-support_7.1.22_1527498229809_0.08472981550059155"
+  },
+  "_npmUser": {
+    "name": "tjieco",
+    "email": "tjiecovandonselaar@gmail.com"
+  },
+  "_npmVersion": "5.6.0",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "cordova-plugin-barcodescanner-browser-support@^7.1.22",
+    "scope": null,
+    "escapedName": "cordova-plugin-barcodescanner-browser-support",
+    "name": "cordova-plugin-barcodescanner-browser-support",
+    "rawSpec": "^7.1.22",
+    "spec": ">=7.1.22 <8.0.0",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/cordova-plugin-barcodescanner-browser-support/-/cordova-plugin-barcodescanner-browser-support-7.1.22.tgz",
+  "_shasum": "e140c20fa457d51f469a0c367fb3d0ad1dc345e4",
+  "_shrinkwrap": null,
+  "_spec": "cordova-plugin-barcodescanner-browser-support@^7.1.22",
+  "_where": "/Users/aprigent/GoogleD/DONNEES/DocumentsPro/2019-2020/Cours/MasterIcone/M2/RechercheEtMobilite/TEST_APPLI/TPQuizz/node_modules",
+  "author": {
+    "name": "Adobe PhoneGap Team"
+  },
+  "bugs": {
+    "url": "https://github.com/Tjieco/cordova-plugin-barcodescanner-browser-support/issues"
+  },
+  "cordova": {
+    "id": "cordova-plugin-barcodescanner-browser-support",
+    "platforms": [
+      "ios",
+      "android",
+      "windows",
+      "browser"
+    ]
+  },
+  "dependencies": {},
+  "description": "You can use the BarcodeScanner plugin to scan different types of barcodes (using the device's camera) and get the metadata encoded in them for processing within your application.",
+  "devDependencies": {
+    "jasmine-node": "1.14.5",
+    "pluginpub": "^0.0.9"
+  },
+  "directories": {},
+  "dist": {
+    "integrity": "sha512-2lehrc4/efgGy8s0tTwC3n41FgCakv/JVHKTmxIDWt+rtlF6AuGGA27vQDV8m/1tpcXxgj3E0fKUveBtsC5VFw==",
+    "shasum": "e140c20fa457d51f469a0c367fb3d0ad1dc345e4",
+    "tarball": "https://registry.npmjs.org/cordova-plugin-barcodescanner-browser-support/-/cordova-plugin-barcodescanner-browser-support-7.1.22.tgz",
+    "fileCount": 36,
+    "unpackedSize": 4161856,
+    "npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbC8X4CRA9TVsSAnZWagAA15QP/1iwQO7SF0y+cKnMvdr8\n1D7FvrcyyXKxrSbyKovycZnCq2hanaSvJQSUKj4sdpCqWkB7GdHBesugTapl\nkSAb4A8Y9n77lsnDeU3mAW2wNr6lhBGMB4JZG2E0J8ZCbVeaQIsHMuaYJnaJ\nss86W9ErWoCWJm9EFFJj3OvqgUcyxxs/MCIwIz/Wm+F+iAJpNL9R/QcaInSg\n1vfIos0LUGbeg/bDZx1o2E9w9pk9Par8WKBdWD71R4RCF8fclprBun/cH36O\nOHy3YiPEEoBk2hGZkHalqou49UxdIImkahUVPagBNuCPQtBQIcmY8DaQWNvX\nLJoqz+70cu3Q2wTBAP6iXN52CoQB1HH2CnjzSGWdvYltWU3jYRjL5qXE/jpp\nEdKr8u/6tOGOwW0n8aZJluUiRjkSuWonjegE/MeTrPR2SaDgWF8/pb1nYBxw\nBUB1E4gtKrC6Nd48wmI2a31REsRdbjXJXYrd7gsM+5tNoINnZtjxJS39g+p3\nrJVLiCXcen7h8QgZeNy77p7aqcC7tJAaFxeKFLw2pT83h2LnqDLcQV6NPg3c\njw9yDdL91elRu9+IrPtSy7YvM/8kfzQZ8SBXL0JCWDR65t46IwYxpk5Xu/ow\nzhxVvoFKGBEEadE9dNJpb5jOhQPphvJw+IvLxlDNpbIkExWsfGXwRKpVBYeQ\nNw7M\r\n=QdVT\r\n-----END PGP SIGNATURE-----\r\n"
+  },
+  "engines": {
+    "cordovaDependencies": {
+      "7.0.0": {
+        "cordova-android": ">=6.3.0"
+      },
+      "7.1.0": {
+        "cordova": ">=7.1.0",
+        "cordova-android": ">=6.3.0"
+      }
+    }
+  },
+  "gitHead": "fc6605c202d7b54ddc28b373bf28f94757015488",
+  "homepage": "https://github.com/phonegap/phonegap-plugin-barcodescanner#readme",
+  "keywords": [
+    "ecosystem:cordova",
+    "ecosystem:phonegap",
+    "cordova-ios",
+    "cordova-android",
+    "cordova-windows",
+    "cordova-browser",
+    "cordova:plugin"
+  ],
+  "license": "MIT",
+  "maintainers": [
+    {
+      "name": "tjieco",
+      "email": "tjiecovandonselaar@gmail.com"
+    }
+  ],
+  "name": "cordova-plugin-barcodescanner-browser-support",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tjieco/cordova-plugin-barcodescanner-browser-support.git"
+  },
+  "scripts": {
+    "test": "jasmine-node --color spec"
+  },
+  "version": "7.1.22"
+}

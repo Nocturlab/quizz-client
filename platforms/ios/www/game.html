@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<title>TP QUIZZ</title>
+<head>
+  <link rel="stylesheet" type="text/css" href="css/index.css" />
+  <link rel="stylesheet" type="text/css" href="css/buttons.css" />
+
+  <script type="text/javascript" src="cordova.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="css/game.css" />
+  <script type="text/javascript" src="js/game.js"></script>
+<style>
+
+</style>
+
+</head>
+
+<body >
+  <div class="game"></div>
+
+  <script type="text/javascript">
+    const remote_url = new URL('http://game.nocturlab.fr');
+    window.addEventListener('load', function(){
+      const game = new Game(remote_url, document.querySelector('.game'));
+      game.start();
+    });
+    /*
+    function scan(){
+      console.log("clicked");
+      cordova.plugins.barcodeScanner.scan(function(result){
+        var url = "questions/reponse.txt";
+        xmlhttp.onreadystatechange = function () {
+          if (xmlhttp.readyState == 4 || xmlhttp.readyState == "complete") {
+            if (xmlhttp.responseText==result.text){
+              reponse.appendChild(document.createTextNode(result.text));
+              alert("Bonne reponse");
+            }else
+              alert("Mauvaise reponse");
+          }
+        }
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send(null);
+      },function(error){
+        //error callback
+        alert(JSON.stringify(error));
+      }
+  
+    );
+  }
+  
+  // Fonction lancée au début du jeu : connexion à une partie
+  // Chargement de la question et affichage
+  function rejoindre() {
+    if (arguments.callee.done) return;
+    arguments.callee.done = true;
+  
+    var question = document.getElementById("question");
+    if (window.XMLHttpRequest) {
+      xmlhttp = new XMLHttpRequest();
+    }
+  
+    var url = "questions/question.txt";
+    xmlhttp.onreadystatechange = function () {
+      if (xmlhttp.readyState == 4 || xmlhttp.readyState == "complete") {
+        question.appendChild(document.createTextNode(xmlhttp.responseText));
+      }
+    }
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send(null);
+  
+  }*/
+  </script>
+</body>
+</html>
