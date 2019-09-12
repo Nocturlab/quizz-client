@@ -1,3 +1,10 @@
+.DS_Store
+.project
+package-lock.json
+.gradle/
+.idea/
+org.eclipse.*
+
 
 # Created by https://www.gitignore.io/api/node,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=node,visualstudiocode
