@@ -1,4 +1,4 @@
-﻿# quizz-client
+# quizz-client
 
 Android app that work with this [API](https://github.com/Nocturlab/quizz-server)
 
