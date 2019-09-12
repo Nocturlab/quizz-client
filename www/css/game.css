@@ -2,7 +2,8 @@
 
 /* Full-width input fields */
 .game input[type=text],
-.game input[type=password] {
+.game input[type=password],
+.game input[type=email] {
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
@@ -151,4 +152,9 @@
   font-weight: bold;
   font-size: 2em;
   text-align: center;
+}
+
+.game .loader {
+  position: relative;
+  margin: auto;
 }

@@ -1,5 +1,31 @@
 'use strict';
 
+function __onLoggedIn(that) {
+    if(!that.listeners.onLoggedIn())
+        return;
+    console.log("Logged in");
+    that.load_game().then(function/*onLoaded*/() {
+        
+    });
+}
+function __onRecieveQuestion(that, question) {
+    if(!that.listeners.onRecieveQuestion(question))
+        return;
+    // Scan with the QrCode Reader and return the result.
+    cordova.plugins.barcodeScanner.scan(function(scan_result){
+        if (scan_result.xmlhttp.responseText==result.text){
+            reponse.appendChild(document.createTextNode(result.text));
+            alert("Bonne reponse");
+        }else
+            alert("Mauvaise reponse");
+    });
+}
+function __onAnswer(that, is_correct) {
+    if(!that.listeners.onAnswer(is_correct))
+        return;
+    console.log("Answer :", is_correct);
+}
+
 /**
  * Class game will initiate and control the game interface
  */
@@ -8,7 +34,8 @@ class Game{
     /**
      * Initiate the game in an HTMLElement
      * 
-     * @param {HTMLElement} html_element 
+     * @param {URL} remote_url
+     * @param {HTMLElement} html_element
      */
     constructor(remote_url, html_element){
         // scope local this into that
@@ -25,32 +52,29 @@ class Game{
             /**
              * this will be triggered when the user has been logged successfully
              */
-            onLoggedIn: function() {
-
-            },
+            onLoggedIn: function() {},
             /**
              * this will be triggered when the user recieve one question
-             * @param {Question} question 
+             * @param {Question} question
              */
-            onRecieveQuestion: function(question) {
-                // Scan with the QrCode Reader and return the result.
-                cordova.plugins.barcodeScanner.scan(function(scan_result){
-                    if (xmlhttp.responseText==result.text){
-                        reponse.appendChild(document.createTextNode(result.text));
-                        alert("Bonne reponse");
-                      }else
-                        alert("Mauvaise reponse");
-                });
-            },
+            onRecieveQuestion: function(question) {},
             /**
              * this will be triggered when the user answer to the question
-             * @param {boolean} is_correct 
+             * @param {boolean} is_correct
              */
             onAnswer: function(is_correct) {}
         }
 
         if(!this.html_element.classList.contains('game'))
             this.html_element.classList.add('game');
+    }
+
+    load_game(){
+        const pannel_el = this.html_element.querySelector(".game.pannel");
+        const pannel = this.create_pannel("pannel", __GAME_PANNEL_HTML).then(function/*onCreated*/(params) {
+            
+        });
+        return pannel;
     }
 
     show_login(){
@@ -62,42 +86,55 @@ class Game{
         let login_modal = this.html_element.querySelector('.login.modal');
         // Create the login modal only if the modal window has been found in the DOM
         if(!login_modal){
-            login_modal = this.create_modal("login", __LOGIN_FORM_HTML, function/*onClosed*/(event) {
+            login_modal = this.create_pannel("login", __LOGIN_FORM_HTML, function/*onClosed*/(event) {
                 event.preventDefault();
                 let modal = null;
                 event.path.forEach(function(element) {
                     if(element.classList && element.classList.contains('login'))
-                        modal = element
+                        modal = element;
                 });
                 modal.style.display='none';
                 window.location.href = 'index.html';
-            }).then(function(modal) {
-                modal.querySelector('form.modal-content').addEventListener('submit', function/*onSubmit*/(event) {
+            }).then(function/*onCreated*/(modal) {
+                const form = modal.querySelector('form.modal-content');
+                const signin_button = form.querySelector('span.signin');
+                
+                signin_button.addEventListener('click', function/*onClick*/(event){
+                    modal.style.display = "none";
+                    that.show_signin().then(function(modal) {
+                        
+                    });
+                });
+
+                form.addEventListener('submit', function/*onSubmit*/(event) {
                     // Prevent automatic send request by the form
                     event.preventDefault();
                     // Prevent submit another request
                     if(submitting)
                         return false;
-        
-                    const pseudo = 'pseudo';
-                    const password = 'password';
-                    const remember_me = false;
-                    const credentials = pseudo+':'+password;
-                    
+                    const data = new FormData(form);
+
+                    const credentials = data.get('pseudo')+':'+data.get('pass');
                     sessionStorage.setItem('login', credentials);
-                    if(remember_me)
+                    if(data.get('remember'))
                         localStorage.setItem('login', credentials);
+                    
+                    data.delete('remember');
+
                     submitting = true;
                     
-                    that.create_modal("loading", __LOADING_HTML).then(function(modal) {
-                        
-                    });
-
+                    that.show_loader();
                     fetch(that.remote_url.href +"/login", {
                         method: 'POST'
                     }).then(function(user){
-                        login_modal.style.display='none';
-                        that.listeners.onLoggedIn(user);
+                        modal.style.display='none';
+                        __onLoggedIn(that);
+                        that.hide_loader();
+                        submitting = false;
+                    }).catch(function(err) {
+                        console.error(err);
+                        that.hide_loader();
+                        submitting = false;
                     });
                 });
                 return Promise.resolve(modal);
@@ -114,15 +151,121 @@ class Game{
     }
 
     show_signin(){
+        // scope local this into that
+        const that = this;
 
+        let submitting = false;
+
+        let signin_modal = this.html_element.querySelector('.signin.modal');
+        // Create the login modal only if the modal window has been found in the DOM
+        if(!signin_modal){
+            signin_modal = this.create_pannel("signin", __SIGNIN_FORM_HTML, function/*onClosed*/(event) {
+                event.preventDefault();
+                let modal = null;
+                event.path.forEach(function(element) {
+                    if(element.classList && element.classList.contains('signin'))
+                        modal = element;
+                });
+                console.log(event.path);
+                modal.style.display='none';
+                that.show_login();
+            }).then(function/*onCreated*/(modal) {
+                const form = modal.querySelector('form.modal-content');
+                const pass_text = form.querySelector('#pass');
+                const pass2_text = form.querySelector('#pass2');
+                pass2_text.addEventListener('change', function/*onChange*/(event) {
+                    if(pass_text.value == pass2_text.value)
+                        pass2_text.setCustomValidity('');
+                    else
+                        pass2_text.setCustomValidity('Les mots de passes sont différents.');
+                }); 
+                    
+                form.addEventListener('submit', function/*onSubmit*/(event) {
+                    // Prevent automatic send request by the form
+                    event.preventDefault();
+                    // Prevent submit another request
+                    if(submitting)
+                        return false;
+        
+                    const data = new FormData(form);
+                    const credentials = data.get('pseudo')+':'+data.get('pass');
+                    
+                    data.delete('pass2');
+                    sessionStorage.setItem('login', credentials);
+
+                    var object = {};
+                    data.forEach((value, key) => {
+                        if(!object.hasOwnProperty(key)){
+                            object[key] = value;
+                            return;
+                        }
+                        if(!Array.isArray(object[key])){
+                            object[key] = [object[key]];    
+                        }
+                        object[key].push(value);
+                    });
+
+                    submitting = true;
+                    
+                    that.show_loader();
+
+                    fetch(that.remote_url.href +"/signin", {
+                        method: 'POST',
+                        body: JSON.stringify(object)
+                    }).then(function(user){
+                        modal.style.display='none';
+                        __onLoggedIn(that);
+                        submitting = false;
+                    }).catch(function(err) {
+                        console.error(err);
+                        submitting = false;
+                    });
+                });
+                return Promise.resolve(modal);
+            });
+        }else{
+            // Transfom var to Promise
+            signin_modal = Promise.resolve(signin_modal);
+        }
+        // Wait for the promise
+        return signin_modal.then(function(modal) {
+            modal.querySelector('form.modal-content').reset();
+            modal.style.display='block';
+            return modal;
+        });
     }
 
-    create_modal(name, html, onClosed){
+    create_loader(){
+        let loader_modal = this.html_element.querySelector(".loading.modal");
+        if(!loader_modal)
+            loader_modal = this.create_pannel("loading", __LOADING_HTML);
+        else{
+            loader_modal.remove();
+            loader_modal = this.create_loader("loading", __LOADING_HTML);
+        }
+        return loader_modal;
+    }
+
+    show_loader(){
+        const loader_modal = this.create_loader();
+        loader_modal.then(function(modal) {
+            modal.style.display = 'block';
+        });
+    }
+
+    hide_loader(){
+        const loader_modal = this.create_loader();
+        loader_modal.then(function(modal) {
+            modal.style.display = 'none';
+        });
+    }
+
+    create_pannel(name, html, onClosed){
         const modal = document.createElement('div');
-        modal.classList.add('login', 'modal');
+        modal.classList.add(name, 'modal');
         modal.innerHTML = html;
         this.html_element.appendChild(modal);
-        modal.querySelectorAll('.close, button.cancel, .login.modal').forEach(function(el) {
+        modal.querySelectorAll('.close, button.cancel, .'+name+'.modal').forEach(function(el) {
             el.addEventListener('click', onClosed);
         });
         
@@ -133,8 +276,19 @@ class Game{
         let login = sessionStorage.getItem('login');
         if(!login) login = localStorage.getItem('login');
         
-        if(login) this.listeners.onLoggedIn();
-        else this.show_login();
+        if(login){
+            const that = this;
+            this.show_loader();
+            fetch(that.remote_url.href +"/login", {
+                method: 'POST'
+            }).then(function(response) {
+                that.hide_loader();
+                onLoggedIn(that);
+            }).catch(function(err) {
+                that.hide_loader();
+                that.show_login();
+            });
+        }else this.show_login();
     }
 
     getNextQuestion(){
@@ -185,14 +339,14 @@ const __LOGIN_FORM_HTML = `<form class="modal-content animate">
 
     <div class="container">
         <label for="pseudo"><b>Pseudonyme</b></label>
-        <input type="text" placeholder="Entrez votre nom d'utilisateur" name="pseudo" required>
+        <input type="text" placeholder="Entrez votre nom d'utilisateur" name="pseudo" id="pseudo" required>
 
         <label for="pass"><b>Mot de passe</b></label>
-        <input type="password" placeholder="Entrez votre mot de passe" name="pass" required>
+        <input type="password" placeholder="Entrez votre mot de passe" name="pass" id="pass" required>
         
         <button type="submit">Login</button>
         <label>
-            <input type="checkbox" checked="checked" name="remember"> Connexion automatique
+            <input type="checkbox" checked="checked" name="remember" id="remember"> Connexion automatique
         </label>
     </div>
 
@@ -212,25 +366,21 @@ const __SIGNIN_FORM_HTML = `<form class="modal-content animate">
 
     <div class="container">
         <label for="pseudo"><b>Pseudonyme</b></label>
-        <input type="text" placeholder="Entrez votre nom d'utilisateur" name="pseudo" required>
+        <input type="text" placeholder="Entrez votre nom d'utilisateur" name="pseudo" id="pseudo" required>
         
-        <label for="email"><b></b></label>
-        <input type="email" placeholder="Entrez votre adresse e-mail" name="email" required>
+        <label for="email"><b>Adresse e-mail</b></label>
+        <input type="email" placeholder="Entrez votre adresse e-mail" name="email" id="email" required>
 
         <label for="pass"><b>Mot de passe</b></label>
-        <input type="password" placeholder="Entrez votre mot de passe" name="pass" required>
+        <input type="password" placeholder="Entrez votre mot de passe" name="pass" id="pass" required>
 
         <label for="pass2"><b>Vérification</b></label>
-        <input type="password" placeholder="Entrez à nouveau votre mot de passe" name="pass2" required>
+        <input type="password" placeholder="Entrez à nouveau votre mot de passe" name="pass2" id="pass2" required>
         
-        <button type="submit">Login</button>
-        <label>
-            <input type="checkbox" checked="checked" name="remember"> Connexion automatique
-        </label>
+        <button type="submit">Signin</button>
     </div>
 
     <div class="container" style="background-color:#f1f1f1">
         <button type="button" class="cancel">Cancel</button>
-        <span class="signin">Pas encore de compte ? <a>Clique ici</a></span>
     </div>
 </form>`

@@ -18,7 +18,9 @@
   <div class="game"></div>
 
   <script type="text/javascript">
-    const remote_url = new URL('http://game.nocturlab.fr');
+    // const remote_url = new URL('http://game.nocturlab.fr');
+    const remote_url = new URL('http://localhost/api');
+
     window.addEventListener('load', function(){
       const game = new Game(remote_url, document.querySelector('.game'));
       game.start();
