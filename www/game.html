@@ -6,6 +6,8 @@
 
   <script type="text/javascript" src="cordova.js"></script>
 
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
   <link rel="stylesheet" type="text/css" href="css/game.css" />
   <script type="text/javascript" src="js/game.js"></script>
 <style>
@@ -19,7 +21,7 @@
 
   <script type="text/javascript">
     // const remote_url = new URL('http://game.nocturlab.fr');
-    const remote_url = new URL('http://localhost/api');
+    const remote_url = new URL('http://localhost:80/api/');
 
     window.addEventListener('load', function(){
       const game = new Game(remote_url, document.querySelector('.game'));

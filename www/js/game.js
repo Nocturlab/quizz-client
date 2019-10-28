@@ -124,7 +124,7 @@ class Game{
                     submitting = true;
                     
                     that.show_loader();
-                    fetch(that.remote_url.href +"/login", {
+                    request(that.remote_url.href +"v2/login", {
                         method: 'POST'
                     }).then(function(user){
                         modal.style.display='none';
@@ -209,7 +209,7 @@ class Game{
                     
                     that.show_loader();
 
-                    fetch(that.remote_url.href +"/signin", {
+                    request(that.remote_url.href +"v2/signin", {
                         method: 'POST',
                         body: JSON.stringify(object)
                     }).then(function(user){
@@ -260,13 +260,31 @@ class Game{
         });
     }
 
-    create_pannel(name, html, onClosed){
+    create_pannel(name, html, parentEl){
+        const panel = document.createElement('div');
+        panel.classList.add(name, 'panel');
+        panel.innerHTML = html;
+
+        if(!parentEl)
+            parentEl = this.html_element;
+
+        parentEl.appendChild(panel);
+        
+        return Promise.resolve(panel);
+    }
+    
+    create_modal(name, html, onClosed, parentEl){
         const modal = document.createElement('div');
         modal.classList.add(name, 'modal');
-        modal.innerHTML = html;
-        this.html_element.appendChild(modal);
-        modal.querySelectorAll('.close, button.cancel, .'+name+'.modal').forEach(function(el) {
-            el.addEventListener('click', onClosed);
+        modal.innerHTML = this.create_pannel(name+"_panel", html, modal).then(function(params) {
+            if(!parentEl)
+                parentEl = this.html_element;
+
+            parentEl.appendChild(modal);
+
+            modal.querySelectorAll('.close, button.cancel, .'+name+'.modal').forEach(function(el) {
+                el.addEventListener('click', onClosed);
+            });
         });
         
         return Promise.resolve(modal);
@@ -279,11 +297,11 @@ class Game{
         if(login){
             const that = this;
             this.show_loader();
-            fetch(that.remote_url.href +"/login", {
+            request(that.remote_url.href +"v2/login", {
                 method: 'POST'
             }).then(function(response) {
                 that.hide_loader();
-                onLoggedIn(that);
+                that.listeners.onLoggedIn(that);
             }).catch(function(err) {
                 that.hide_loader();
                 that.show_login();
@@ -292,7 +310,7 @@ class Game{
     }
 
     getNextQuestion(){
-        fetch(this.remote_url.href +'/question')
+        request(this.remote_url.href +'v2/question')
             .then();
     }
 
@@ -301,8 +319,6 @@ class Game{
     }
 };
 
-const __fetch = fetch;
-fetch
 /**
  * Override the default fetch to add the login arguments automaticaly
  * You doesn't need to care of it later in the game development.
@@ -310,7 +326,7 @@ fetch
  * @param {RequestInfo} path
  * @param {RequestInit} options
  */
-fetch = function(path, options) {
+const request = function(path, options) {
     options = Object.assign({}, options, {
         headers: {
             'Content-type': 'application/json', // json by default because I use it on my API
@@ -318,7 +334,7 @@ fetch = function(path, options) {
         }
     });
     // Send the request with the real js fetch but with our modified arguments
-    return __fetch(path, options).then(function(response) {
+    return fetch(path, options).then(function(response) {
         // if the server respond us that credentials are invalid, so we remove it from the storage
         if (!response.ok && (response.status==401 || response.status==403)) {
             sessionStorage.removeItem('login');
@@ -384,3 +400,7 @@ const __SIGNIN_FORM_HTML = `<form class="modal-content animate">
         <button type="button" class="cancel">Cancel</button>
     </div>
 </form>`
+
+const __GAME_PANNEL_HTML = `<div class='header'>
+    <i></i>
+</div>`
