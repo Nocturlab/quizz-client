@@ -3,17 +3,99 @@
     <head>
         <meta charset="utf-8" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
-        <link rel="stylesheet" type="text/css" href="css/buttons.css" />
+
         <title>Le mini-jeu de quizz</title>
     </head>
     <body>
+        <aside class="nav-bar mdc-drawer shape-editor-drawer shape-editor-drawer--side" style="border-radius: 0px 24px 24px 0px;">
+            <div class="mdc-drawer__header shape-editor-drawer__header">
+                <img class="shape-editor-drawer__header-image" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20fill%3D%22%23E7E7E7%22%20d%3D%22M0%200h120v120H0z%22%2F%3E%3Cpath%20fill%3D%22%23B9B9B9%22%20d%3D%22M71.995%2067c.003.166.005.333.005.5C72%2079.926%2061.926%2090%2049.5%2090S27%2079.926%2027%2067.5%2037.074%2045%2049.5%2045c4.34%200%208.395%201.23%2011.832%203.359L72%2030l21.5%2037H71.995zm0%200c-.172-7.877-4.392-14.757-10.663-18.641L50.5%2067h21.495z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E%0A">
+                <h3 class="mdc-drawer__title">Headline 6</h3>
+                <h6 class="mdc-drawer__subtitle
+                        shape-editor-drawer__subtitle">Body 2</h6>
+            </div>
+            <div class="mdc-drawer__content shape-editor-drawer__content">
+                <nav class="mdc-list">
+                    <a class="mdc-list-item mdc-list-item--activated" tabindex="-1">
+                        <span class="mdc-list-item__graphic material-icons">
+                            favorite
+                        </span>
+                        <span class="mdc-list-item__text">
+                            Body 2
+                        </span>
+                    </a>
+                    <a class="mdc-list-item" tabindex="-1">
+                        <span class="mdc-list-item__graphic material-icons">
+                            favorite
+                        </span>
+                        <span class="mdc-list-item__text">
+                            Body 2
+                        </span>
+                    </a>
+                    <a class="mdc-list-item" tabindex="-1">
+                        <span class="mdc-list-item__graphic material-icons">
+                            favorite
+                        </span>
+                        <span class="mdc-list-item__text">
+                            Body 2
+                        </span>
+                    </a>
+                    <a class="mdc-list-item" tabindex="-1">
+                        <span class="mdc-list-item__graphic material-icons">
+                            favorite
+                        </span>
+                        <span class="mdc-list-item__text">
+                            Body 2
+                        </span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
         <div class="app">
             <h1>Quizz</h1>
             <p class="subtext">TP Mobilité et recherche d'information</p>
             <p class="subtext">Quizz rapide</p>
             <p></p>
-            <a href="game.html" class="button button-action button-rounded">Commencer</a>
         </div>
         <script type="text/javascript" src="cordova.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="css/game.css" />
+
+
+        <script type="text/javascript" src="js/events.js"></script>
+        <script type="text/javascript" src="js/game.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="css/material-components.min.css"/>
+        <script type="text/javascript" src="js/material-components.min.js"></script>
+
+
+        <script type="text/javascript">
+            const remote_url = new URL('http://localhost:80/api/');
+
+            window.addEventListener('load', function(){
+                const game = new Game(remote_url, document.querySelector('.app'), 'app');
+                game.on('loggedIn', function(params) {
+                    const button = document.createElement('a');
+                    button.setAttribute('href', '/game.html');
+                    button.classList.add('button');
+                    button.innerHTML = `<button class="mdc-button mdc-button--outlined">
+    <i aria-hidden="true" class="material-icons mdc-button__icon"><!---->games<!----></i>
+    <span class="mdc-button__label"><!---->Démarrer<!----></span>
+    <div class="mdc-button__ripple"></div>
+</button>`;         
+                    const buttonRipple = new mdc.ripple.MDCRipple(button.querySelector('.mdc-button'));
+
+                    game.html_element.appendChild(button);
+
+                })
+                game.start();
+            });
+
+            
+        </script>
+
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+
     </body>
 </html>

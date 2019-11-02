@@ -46,6 +46,20 @@ body {
 }
 
 /* Portrait layout (default) */
+
+.nav-bar{
+    position: absolute;
+    height: 100%;
+    top:0;
+    left: -255px;
+    transition: all 1s linear;
+    --webkit-transition: all 1s linear;
+}
+
+.nav-bar.opened{
+    left: 0px;
+}
+
 .app {
     background:url(../img/logo.png) no-repeat center top; /* 170px x 200px */
     position:absolute;             /* position in the center of the screen */
@@ -80,6 +94,10 @@ body {
         margin:-90px 0px 0px -198px;  /* offset vertical: half of image height */
                                       /* offset horizontal: half of image width and text area width */
     }
+}
+
+a.button{
+    text-decoration-line: none;
 }
 
 h1 {

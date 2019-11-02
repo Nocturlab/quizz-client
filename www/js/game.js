@@ -1,15 +1,15 @@
 'use strict';
 
-function __onLoggedIn(that) {
-    if(!that.listeners.onLoggedIn())
+function __onLoggedIn(that, user) {
+    if(!that.emit('loggedIn', that, user))
         return;
     console.log("Logged in");
     that.load_game().then(function/*onLoaded*/() {
-        
+        that.open_home_panel();
     });
 }
 function __onRecieveQuestion(that, question) {
-    if(!that.listeners.onRecieveQuestion(question))
+    if(!that.emit('recieveQuestion', question))
         return;
     // Scan with the QrCode Reader and return the result.
     cordova.plugins.barcodeScanner.scan(function(scan_result){
@@ -20,8 +20,8 @@ function __onRecieveQuestion(that, question) {
             alert("Mauvaise reponse");
     });
 }
-function __onAnswer(that, is_correct) {
-    if(!that.listeners.onAnswer(is_correct))
+function __onAnswer(that, question, is_correct) {
+    if(!that.emit('answer', question, is_correct))
         return;
     console.log("Answer :", is_correct);
 }
@@ -29,7 +29,7 @@ function __onAnswer(that, is_correct) {
 /**
  * Class game will initiate and control the game interface
  */
-class Game{
+class Game extends EventHandler{
 
     /**
      * Initiate the game in an HTMLElement
@@ -37,44 +37,33 @@ class Game{
      * @param {URL} remote_url
      * @param {HTMLElement} html_element
      */
-    constructor(remote_url, html_element){
-        // scope local this into that
-        const that = this;
+    constructor(remote_url, html_element, className='game'){
+        super();
+
+        this.className = className;
+
         /**
          * Define the local fields
          */
         this.html_element = html_element;
         this.remote_url = remote_url;
-        /**
-         * Define the differents listeners the user can override.
-         */
-        this.listeners = {
-            /**
-             * this will be triggered when the user has been logged successfully
-             */
-            onLoggedIn: function() {},
-            /**
-             * this will be triggered when the user recieve one question
-             * @param {Question} question
-             */
-            onRecieveQuestion: function(question) {},
-            /**
-             * this will be triggered when the user answer to the question
-             * @param {boolean} is_correct
-             */
-            onAnswer: function(is_correct) {}
-        }
 
-        if(!this.html_element.classList.contains('game'))
-            this.html_element.classList.add('game');
+        if(!this.html_element.classList.contains(this.className))
+            this.html_element.classList.add(this.className);
     }
 
     load_game(){
-        const pannel_el = this.html_element.querySelector(".game.pannel");
-        const pannel = this.create_pannel("pannel", __GAME_PANNEL_HTML).then(function/*onCreated*/(params) {
+        // scope local this into that
+        const that = this;
+
+        if(!this.emit('load', that))
+            return;
+
+        const panel_el = this.html_element.querySelector("."+this.className+".panel");
+        const panel = this.create_panel("panel", __GAME_PANEL_HTML).then(function/*onCreated*/(params) {
             
         });
-        return pannel;
+        return panel;
     }
 
     show_login(){
@@ -86,7 +75,7 @@ class Game{
         let login_modal = this.html_element.querySelector('.login.modal');
         // Create the login modal only if the modal window has been found in the DOM
         if(!login_modal){
-            login_modal = this.create_pannel("login", __LOGIN_FORM_HTML, function/*onClosed*/(event) {
+            login_modal = this.create_panel("login", __LOGIN_FORM_HTML, function/*onClosed*/(event) {
                 event.preventDefault();
                 let modal = null;
                 event.path.forEach(function(element) {
@@ -97,6 +86,8 @@ class Game{
                 window.location.href = 'index.html';
             }).then(function/*onCreated*/(modal) {
                 const form = modal.querySelector('form.modal-content');
+                if(!form)
+                    throw new Error("Form wasn't created");
                 const signin_button = form.querySelector('span.signin');
                 
                 signin_button.addEventListener('click', function/*onClick*/(event){
@@ -128,7 +119,7 @@ class Game{
                         method: 'POST'
                     }).then(function(user){
                         modal.style.display='none';
-                        __onLoggedIn(that);
+                        __onLoggedIn(that, user);
                         that.hide_loader();
                         submitting = false;
                     }).catch(function(err) {
@@ -159,7 +150,7 @@ class Game{
         let signin_modal = this.html_element.querySelector('.signin.modal');
         // Create the login modal only if the modal window has been found in the DOM
         if(!signin_modal){
-            signin_modal = this.create_pannel("signin", __SIGNIN_FORM_HTML, function/*onClosed*/(event) {
+            signin_modal = this.create_panel("signin", __SIGNIN_FORM_HTML, function/*onClosed*/(event) {
                 event.preventDefault();
                 let modal = null;
                 event.path.forEach(function(element) {
@@ -214,7 +205,7 @@ class Game{
                         body: JSON.stringify(object)
                     }).then(function(user){
                         modal.style.display='none';
-                        __onLoggedIn(that);
+                        __onLoggedIn(that, user);
                         submitting = false;
                     }).catch(function(err) {
                         console.error(err);
@@ -236,55 +227,34 @@ class Game{
     }
 
     create_loader(){
-        let loader_modal = this.html_element.querySelector(".loading.modal");
-        if(!loader_modal)
-            loader_modal = this.create_pannel("loading", __LOADING_HTML);
-        else{
-            loader_modal.remove();
-            loader_modal = this.create_loader("loading", __LOADING_HTML);
+        let loader_modal = document.querySelector(".loading");
+        if(!loader_modal){
+            loader_modal = document.createElement('div');
+            loader_modal.classList.add('loading');
+            loader_modal.innerHTML = __LOADING_HTML;
+            const linearProgress = new mdc.linearProgress.MDCLinearProgress(loader_modal.querySelector('.mdc-linear-progress'));
+            document.body.prepend(loader_modal);
         }
         return loader_modal;
     }
 
     show_loader(){
         const loader_modal = this.create_loader();
-        loader_modal.then(function(modal) {
-            modal.style.display = 'block';
-        });
     }
 
     hide_loader(){
-        const loader_modal = this.create_loader();
-        loader_modal.then(function(modal) {
-            modal.style.display = 'none';
-        });
+        let loader_modal = document.querySelector(".loading");
+        if(loader_modal)
+            loader_modal.remove();
     }
 
-    create_pannel(name, html, parentEl){
-        const panel = document.createElement('div');
-        panel.classList.add(name, 'panel');
-        panel.innerHTML = html;
-
-        if(!parentEl)
-            parentEl = this.html_element;
-
-        parentEl.appendChild(panel);
-        
-        return Promise.resolve(panel);
-    }
-    
-    create_modal(name, html, onClosed, parentEl){
+    create_panel(name, html, onClosed){
         const modal = document.createElement('div');
         modal.classList.add(name, 'modal');
-        modal.innerHTML = this.create_pannel(name+"_panel", html, modal).then(function(params) {
-            if(!parentEl)
-                parentEl = this.html_element;
-
-            parentEl.appendChild(modal);
-
-            modal.querySelectorAll('.close, button.cancel, .'+name+'.modal').forEach(function(el) {
-                el.addEventListener('click', onClosed);
-            });
+        modal.innerHTML = html;
+        this.html_element.appendChild(modal);
+        modal.querySelectorAll('.close, button.cancel, .'+name+'.modal').forEach(function(el) {
+            el.addEventListener('click', onClosed);
         });
         
         return Promise.resolve(modal);
@@ -301,12 +271,16 @@ class Game{
                 method: 'POST'
             }).then(function(response) {
                 that.hide_loader();
-                that.listeners.onLoggedIn(that);
+                __onLoggedIn(that, response);
             }).catch(function(err) {
                 that.hide_loader();
                 that.show_login();
             });
         }else this.show_login();
+    }
+
+    open_home_panel(){
+        
     }
 
     getNextQuestion(){
@@ -362,7 +336,7 @@ const __LOGIN_FORM_HTML = `<form class="modal-content animate">
         
         <button type="submit">Login</button>
         <label>
-            <input type="checkbox" checked="checked" name="remember" id="remember"> Connexion automatique
+            <input type="checkbox" name="remember" id="remember"> Connexion automatique
         </label>
     </div>
 
@@ -372,7 +346,7 @@ const __LOGIN_FORM_HTML = `<form class="modal-content animate">
     </div>
 </form>`
 
-const __LOADING_HTML = `<div class="loader"></div>`
+const __LOADING_HTML = `<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate"><div class="mdc-linear-progress__buffering-dots"></div><div class="mdc-linear-progress__buffer"></div><div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar"><span class="mdc-linear-progress__bar-inner"></span></div><div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar"><span class="mdc-linear-progress__bar-inner"></span></div></div>`
 
 const __SIGNIN_FORM_HTML = `<form class="modal-content animate">
     <div class="imgcontainer">
@@ -401,6 +375,9 @@ const __SIGNIN_FORM_HTML = `<form class="modal-content animate">
     </div>
 </form>`
 
-const __GAME_PANNEL_HTML = `<div class='header'>
+const __GAME_PANEL_HTML = `<div class='panel header'>
     <i></i>
+</div>
+<div class='panel body'>
+
 </div>`
