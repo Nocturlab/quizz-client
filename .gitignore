@@ -4,6 +4,7 @@ package-lock.json
 .gradle/
 .idea/
 org.eclipse.*
+platforms/
 
 
 # Created by https://www.gitignore.io/api/node,visualstudiocode
