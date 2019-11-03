@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [8.x, 10.x, 12.x]
+        node-version: [8.x, 10.x]
     steps:
     - uses: actions/checkout@v1
     - name: Use Node.js ${{ matrix.node-version }}
@@ -15,8 +15,8 @@ jobs:
     - name: Build
       run: |
         npm install -g phonegap cordova
-        phonegap plateform add android
-        phonegap plateform add browser
+        phonegap platform add android
+        phonegap platform add browser
       env:
         CI: true
     - name: Tests

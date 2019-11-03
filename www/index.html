@@ -3,17 +3,63 @@
     <head>
         <meta charset="utf-8" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
-        <link rel="stylesheet" type="text/css" href="css/buttons.css" />
+        <link href="css/material-icons/font.css" rel="stylesheet">
+        
         <title>Le mini-jeu de quizz</title>
     </head>
     <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        
         <div class="app">
             <h1>Quizz</h1>
             <p class="subtext">TP Mobilité et recherche d'information</p>
             <p class="subtext">Quizz rapide</p>
-            <p></p>
-            <a href="game.html" class="button button-action button-rounded">Commencer</a>
         </div>
         <script type="text/javascript" src="cordova.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="css/game.css" />
+        
+        <script type="text/javascript" src="js/events.js"></script>
+        <script type="text/javascript" src="js/game.js"></script>
+        
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="css/material-components.min.css"
+        />
+        <script type="text/javascript" src="js/material-components.min.js"></script>
+        
+        <script type="text/javascript">
+            const remote_url = new URL("http://quizz-client.nocturlab.fr:80/api/");
+            
+            window.addEventListener("load", function() {
+                
+                const game = new Game(
+                    remote_url,
+                    document.querySelector(".app"),
+                    "app"
+                );
+                game.on("loggedIn", function(params) {
+                    const button = document.createElement("a");
+                    button.setAttribute("href", "game.html");
+                    button.classList.add("start-game-button");
+                    button.innerHTML = `<button class="mdc-button mdc-button--outlined">
+                        <i aria-hidden="true" class="material-icons mdc-button__icon"><!---->videogame_asset<!----></i>
+                        <span class="mdc-button__label"><!---->Démarrer<!----></span>
+                        <div class="mdc-button__ripple"></div>
+                    </button>`;
+                    const buttonRipple = new mdc.ripple.MDCRipple(
+                        button.querySelector(".mdc-button")
+                    );
+                    game.html_element.appendChild(button);
+                });
+                game.start();
+            });
+        </script>
+        
+        <link
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            rel="stylesheet"
+        />
     </body>
 </html>
