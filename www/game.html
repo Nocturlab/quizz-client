@@ -142,14 +142,14 @@
                             game.off('tick');
                             const timer = document.querySelector('header.mdc-top-app-bar .mdc-top-app-bar__section--align-end');
                             const start_date = new Date();
-                            // This event is triggered every seconds.
+                            // This event is triggered every seconds. this display the in-game timer
                             game.on('tick', function() {
                                 const date = new Date(Date.now() - start_date);
                                 const time = date.toLocaleTimeString('fr-FR', {
                                     minute: 'numeric',
                                     second: 'numeric'
                                 });
-                                timer.innerHTML = `<p>${time} <i aria-hidden="true" class="material-icons mdc-button__icon answer-remove"><!---->close<!----></i></p>`;
+                                timer.innerHTML = `<p>${time}</p>`;
                             });
 
                             question_el.querySelector('.value').innerHTML = question.value;
@@ -168,17 +168,57 @@
 
                             game.html_element.appendChild(question_el);
                             game.html_element.appendChild(answers_el);
+                            game.html_element.appendChild(resource_el);
                             const button_answer = answers_el.querySelector('.answers .mdc-button');
                             const answersRipple = new mdc.ripple.MDCRipple(button_answer);
+                            const answer_list_el = document.createElement('ul');
+                            answer_list_el.classList.add('mdc-list');
+                            answer_list_el.innerHTML = ``;
                             button_answer.addEventListener('click', function() {
                                 cordova.plugins.barcodeScanner.scan(function(result){
                                     if(!user_response.includes(result.text)){
-                                        user_response.push(result.text);
-                                        const answer_el = document.createElement('div');
-                                        answer_el.classList.add('answer', 'answer-'+(user_response.length-1));
-                                        answer_el.innerHTML = `<p>${result.text}</p>`;
+                                        const value = result.text;
+                                        user_response.push(value);
+                                        const answer_el = document.createElement('li');
+                                        answer_el.classList.add('answer', 'mdc-list-item', 'mdc-ripple-upgraded');
+                                        answer_el.innerHTML = `<span class="mdc-list-item__text">
+    ${value}
+</span>
+<span aria-hidden="true" class="mdc-list-item__meta"><!----><!---->
+    <button data-mdc-ripple-is-unbounded="" class="mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;" tabindex="-1">
+        close
+    </button>
+<!----><!----></span>`;
+                                        const answerRipple = new mdc.ripple.MDCRipple(answer_el.querySelector('span button.mdc-icon-button'));
                                         answers_el.appendChild(answer_el);
+                                        answer_el.querySelector('span button.mdc-icon-button').addEventListener('click', function() {
+                                            console.log(value);
+                                            const index = user_response.indexOf(value);
+                                            console.log(index);
+                                            user_response.splice(index, 1);
+                                            answer_el.remove();
+                                        });
                                     }
+                                });
+                            });
+
+                            game.html_element.querySelector('.send-answer').addEventListener('click', function() {
+                                game.show_loader();
+                                const value = [];
+                                value.push(Date.now() - start_date);
+                                for (const answer of user_response) {
+                                    value.push(answer);
+                                }
+                                request(game.remote_url+`v2/questions/${question.id}/answer`,{
+                                    method: 'POST',
+                                    body: JSON.stringify(value)
+                                }).then(function(response) {
+                                    return response.json();
+                                }).then(function(response) {
+                                    game.hide_loader();
+                                    console.log(response);
+                                    game.html_element.innerHTML = '';
+                                    game.emit('start');
                                 });
                             });
                         });
