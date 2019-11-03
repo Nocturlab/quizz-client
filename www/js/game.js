@@ -4,9 +4,7 @@ function __onLoggedIn(that, user) {
     if(!that.emit('loggedIn', that, user))
         return;
     console.log("Logged in");
-    that.load_game().then(function/*onLoaded*/() {
-        that.open_home_panel();
-    });
+    that.emit('start');
 }
 function __onRecieveQuestion(that, question) {
     if(!that.emit('recieveQuestion', question))
@@ -50,20 +48,6 @@ class Game extends EventHandler{
 
         if(!this.html_element.classList.contains(this.className))
             this.html_element.classList.add(this.className);
-    }
-
-    load_game(){
-        // scope local this into that
-        const that = this;
-
-        if(!this.emit('load', that))
-            return;
-
-        const panel_el = this.html_element.querySelector("."+this.className+".panel");
-        const panel = this.create_panel("panel", __GAME_PANEL_HTML).then(function/*onCreated*/(params) {
-            
-        });
-        return panel;
     }
 
     show_login(){
@@ -118,6 +102,8 @@ class Game extends EventHandler{
                     request(that.remote_url.href +"v2/login", {
                         method: 'POST'
                     }).then(function(user){
+                        return user.json();
+                    }).then(function(user) {
                         modal.style.display='none';
                         __onLoggedIn(that, user);
                         that.hide_loader();
@@ -206,6 +192,7 @@ class Game extends EventHandler{
                     }).then(function(user){
                         modal.style.display='none';
                         __onLoggedIn(that, user);
+                        that.hide_loader();
                         submitting = false;
                     }).catch(function(err) {
                         console.error(err);
@@ -269,9 +256,14 @@ class Game extends EventHandler{
             this.show_loader();
             request(that.remote_url.href +"v2/login", {
                 method: 'POST'
+            }).then(function(response){
+                return response.json();
             }).then(function(response) {
                 that.hide_loader();
                 __onLoggedIn(that, response);
+                setInterval(() => {
+                    that.emit('tick');
+                }, 1000);
             }).catch(function(err) {
                 that.hide_loader();
                 that.show_login();
@@ -284,8 +276,13 @@ class Game extends EventHandler{
     }
 
     getNextQuestion(){
-        request(this.remote_url.href +'v2/question')
-            .then();
+        const that = this;
+        this.show_loader();
+        return request(this.remote_url.href +'v2/question')
+            .then(function(response) {
+                that.hide_loader();
+                return response.json();
+            });
     }
 
     ask(question){
@@ -374,10 +371,3 @@ const __SIGNIN_FORM_HTML = `<form class="modal-content animate">
         <button type="button" class="cancel">Cancel</button>
     </div>
 </form>`
-
-const __GAME_PANEL_HTML = `<div class='panel header'>
-    <i></i>
-</div>
-<div class='panel body'>
-
-</div>`

@@ -158,3 +158,11 @@
   position: relative;
   margin: auto;
 }
+
+.game{
+  margin-top: 70px;
+}
+
+.mdc-drawer.mdc-drawer--modal{
+  top: 0px;
+}
