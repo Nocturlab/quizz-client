@@ -61,7 +61,8 @@ body {
 
 
 .question,
-.answers {
+.answers,
+.resource {
     position: relative;             /* position in the center of the screen */
     left:50%;
     top:50%;

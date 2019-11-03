@@ -120,13 +120,21 @@
                     game.on('start', function() {
                         const question_el = document.createElement('div');
                         question_el.classList.add('question', 'mdc-card');
-                        question_el.innerHTML = `<h2 class="value"></h2>
-<div class="resource">
-    <h4 class="title"></h4>
-    <p class="summary"></p>
-</div>`;
+                        question_el.innerHTML = `<h2 class="value"></h2>`;
+                        
                         const answers_el = document.createElement('div');
                         answers_el.classList.add('answers', 'mdc-card');
+                        
+                        const resource_el = document.createElement('div');
+                        resource_el.classList.add('resource', 'mdc-card');
+                        resource_el.innerHTML = `<h4 class="title"></h4> <p class="summary"></p>`;
+
+                        const send_answer_button = document.createElement('button');
+                        send_answer_button.classList.add('send-answer', 'mdc-fab');
+                        send_answer_button.setAttribute('aria-label', 'Envoyer');
+                        send_answer_button.innerHTML = `<div class="mdc-fab__ripple"></div><span class="mdc-fab__icon material-icons">send</span>`;
+                        const sendAnswerRipple = new mdc.ripple.MDCRipple(send_answer_button);
+                        game.html_element.appendChild(send_answer_button);
 
                         game.getNextQuestion().then(function(question) {
                             var user_response = [];
@@ -136,25 +144,26 @@
                             const start_date = new Date();
                             // This event is triggered every seconds.
                             game.on('tick', function() {
-                                const date = new Date() - start_date;
+                                const date = new Date(Date.now() - start_date);
                                 const time = date.toLocaleTimeString('fr-FR', {
-                                    timeStyle: 'medium'
+                                    minute: 'numeric',
+                                    second: 'numeric'
                                 });
-                                timer.innerHTML = "<p>"+time+"</p>"
+                                timer.innerHTML = `<p>${time} <i aria-hidden="true" class="material-icons mdc-button__icon answer-remove"><!---->close<!----></i></p>`;
                             });
 
                             question_el.querySelector('.value').innerHTML = question.value;
                             answers_el.innerHTML += `<div><button class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
-    <i aria-hidden="true" class="material-icons mdc-button__icon"><!---->camera<!----></i>
+    <i aria-hidden="true" class="material-icons mdc-button__icon"><!---->add_a_photo<!----></i>
     <span class="mdc-button__label"><!---->Répondre<!----></span>
     <div class="mdc-button__ripple"></div>
 </button></div>`;
                             if(question.resource){
-                                question_el.querySelector('.resource .title').innerHTML = question.resource.name;
-                                question_el.querySelector('.resource .summary').innerHTML = question.resource.summary;
+                                resource_el.querySelector('.title').innerHTML = question.resource.name;
+                                resource_el.querySelector('.summary').innerHTML = question.resource.summary;
                             }else{
-                                question_el.querySelector('.resource .title').innerHTML = ``;
-                                question_el.querySelector('.resource .summary').innerHTML = ``;
+                                resource_el.querySelector('.title').innerHTML = ``;
+                                resource_el.querySelector('.summary').innerHTML = ``;
                             }
 
                             game.html_element.appendChild(question_el);
@@ -163,8 +172,13 @@
                             const answersRipple = new mdc.ripple.MDCRipple(button_answer);
                             button_answer.addEventListener('click', function() {
                                 cordova.plugins.barcodeScanner.scan(function(result){
-                                    console.log(result.text);
-
+                                    if(!user_response.includes(result.text)){
+                                        user_response.push(result.text);
+                                        const answer_el = document.createElement('div');
+                                        answer_el.classList.add('answer', 'answer-'+(user_response.length-1));
+                                        answer_el.innerHTML = `<p>${result.text}</p>`;
+                                        answers_el.appendChild(answer_el);
+                                    }
                                 });
                             });
                         });
@@ -174,13 +188,6 @@
                         game.html_element.innerHTML = '';
                         drawer.open = false;
                         game.emit('start');
-                    });
-
-                    document.querySelector('.mdc-list-item.logout').addEventListener('click', function() {
-                        sessionStorage.removeItem('login');
-                        localStorage.removeItem('login');
-                        drawer.open = false;
-                        window.location.href = 'index.html';
                     });
 
                     /* Génération du menu */
@@ -204,6 +211,14 @@
 
                 });
                 game.start();
+
+                // Bouton de déconnexion peut être utilisé même sans être connecté (en cas de bug)
+                document.querySelector('.mdc-list-item.logout').addEventListener('click', function() {
+                    sessionStorage.removeItem('login');
+                    localStorage.removeItem('login');
+                    drawer.open = false;
+                    window.location.href = 'index.html';
+                });
             });
             /*
             function scan(){

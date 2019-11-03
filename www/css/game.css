@@ -166,3 +166,10 @@
 .mdc-drawer.mdc-drawer--modal{
   top: 0px;
 }
+
+.mdc-fab.send-answer{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1;
+}
