@@ -298,6 +298,7 @@ class Game extends EventHandler{
  * @param {RequestInit} options
  */
 const request = function(path, options) {
+    console.log(path);
     options = Object.assign({}, options, {
         headers: {
             'Content-type': 'application/json', // json by default because I use it on my API
@@ -306,6 +307,8 @@ const request = function(path, options) {
     });
     // Send the request with the real js fetch but with our modified arguments
     return fetch(path, options).then(function(response) {
+        console.log(path);
+
         // if the server respond us that credentials are invalid, so we remove it from the storage
         if (!response.ok && (response.status==401 || response.status==403)) {
             sessionStorage.removeItem('login');

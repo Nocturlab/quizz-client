@@ -29,7 +29,7 @@
         <script type="text/javascript" src="js/material-components.min.js"></script>
         
         <script type="text/javascript">
-            const remote_url = new URL("http://localhost:80/api/");
+            const remote_url = new URL("http://10.0.10.100:80/api/");
             
             window.addEventListener("load", function() {
                 
@@ -40,7 +40,7 @@
                 );
                 game.on("loggedIn", function(params) {
                     const button = document.createElement("a");
-                    button.setAttribute("href", "/game.html");
+                    button.setAttribute("href", "game.html");
                     button.classList.add("start-game-button");
                     button.innerHTML = `<button class="mdc-button mdc-button--outlined">
                         <i aria-hidden="true" class="material-icons mdc-button__icon"><!---->games<!----></i>

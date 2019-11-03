@@ -6,7 +6,7 @@
         
         <script type="text/javascript" src="cordova.js"></script>
         
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="css/material-icons/font.css" rel="stylesheet">
         
         <link rel="stylesheet" type="text/css" href="css/game.css" />
             
@@ -58,7 +58,7 @@
                     <h6 class="mdc-list-group__subheader">Paramètres</h6>
                     <a class="mdc-list-item logout" tabindex="-1">
                         <span class="mdc-list-item__graphic material-icons">
-                            logout
+                            lock
                         </span>
                         <span class="mdc-list-item__text">
                             Déconnexion
@@ -83,7 +83,7 @@
         
         <script type="text/javascript">
             // const remote_url = new URL('http://game.nocturlab.fr');
-            const remote_url = new URL('http://localhost:80/api/');
+            const remote_url = new URL('http://10.0.10.100:80/api/');
 
             var user = null;
             window.addEventListener('load', function(){
@@ -119,25 +119,74 @@
                     // this event is triggered when the game start.
                     game.on('start', function() {
                         const question_el = document.createElement('div');
-                        question_el.classList.add('question');
+                        question_el.classList.add('question', 'mdc-card');
                         question_el.innerHTML = `<h2 class="value"></h2>
-                        <div></div>`;
+<div class="resource">
+    <h4 class="title"></h4>
+    <p class="summary"></p>
+</div>`;
+                        const answers_el = document.createElement('div');
+                        answers_el.classList.add('answers', 'mdc-card');
+
                         game.getNextQuestion().then(function(question) {
+                            var user_response = [];
                             console.log(question);
-                            
+                            game.off('tick');
+                            const timer = document.querySelector('header.mdc-top-app-bar .mdc-top-app-bar__section--align-end');
+                            const start_date = new Date();
+                            // This event is triggered every seconds.
+                            game.on('tick', function() {
+                                const date = new Date() - start_date;
+                                const time = date.toLocaleTimeString('fr-FR', {
+                                    timeStyle: 'medium'
+                                });
+                                timer.innerHTML = "<p>"+time+"</p>"
+                            });
+
+                            question_el.querySelector('.value').innerHTML = question.value;
+                            answers_el.innerHTML += `<div><button class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
+    <i aria-hidden="true" class="material-icons mdc-button__icon"><!---->camera<!----></i>
+    <span class="mdc-button__label"><!---->Répondre<!----></span>
+    <div class="mdc-button__ripple"></div>
+</button></div>`;
+                            if(question.resource){
+                                question_el.querySelector('.resource .title').innerHTML = question.resource.name;
+                                question_el.querySelector('.resource .summary').innerHTML = question.resource.summary;
+                            }else{
+                                question_el.querySelector('.resource .title').innerHTML = ``;
+                                question_el.querySelector('.resource .summary').innerHTML = ``;
+                            }
+
+                            game.html_element.appendChild(question_el);
+                            game.html_element.appendChild(answers_el);
+                            const button_answer = answers_el.querySelector('.answers .mdc-button');
+                            const answersRipple = new mdc.ripple.MDCRipple(button_answer);
+                            button_answer.addEventListener('click', function() {
+                                cordova.plugins.barcodeScanner.scan(function(result){
+                                    console.log(result.text);
+
+                                });
+                            });
                         });
                     });
 
                     document.querySelector('.mdc-list-item.start-game-button').addEventListener('click', function() {
                         game.html_element.innerHTML = '';
+                        drawer.open = false;
                         game.emit('start');
                     });
 
                     document.querySelector('.mdc-list-item.logout').addEventListener('click', function() {
                         sessionStorage.removeItem('login');
                         localStorage.removeItem('login');
+                        drawer.open = false;
                         window.location.href = 'index.html';
                     });
+
+                    /* Génération du menu */
+
+                    document.querySelector('.mdc-drawer__title.game-data-username').innerHTML = user.pseudo;
+                    document.querySelector('.mdc-drawer__subtitle.game-data-email').innerHTML = user.email;
 
                     if(user.admin){
                         const logout_button = document.querySelector('.mdc-list');
@@ -151,6 +200,7 @@
                         </span>`;
                         logout_button.appendChild(admin_button);
                     }
+                    /* fin du menu */
 
                 });
                 game.start();
