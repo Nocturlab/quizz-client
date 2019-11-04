@@ -82,8 +82,8 @@
         <script type="text/javascript" src="js/material-components.min.js"></script>
         
         <script type="text/javascript">
-            // const remote_url = new URL('http://game.nocturlab.fr');
-            const remote_url = new URL('http://10.0.10.100:80/api/');
+            const remote_url = new URL('http://quizz.nocturlab.fr');
+            // const remote_url = new URL('http://192.168.43.25:80/api/');
 
             var user = null;
             window.addEventListener('load', function(){
@@ -246,6 +246,14 @@
                             Administration
                         </span>`;
                         logout_button.appendChild(admin_button);
+
+                        admin_button.addEventListener('click', function() {
+                            game.html_element.innerHTML = ``;
+
+                            const adminMenu = new AdminMenu(user, game.html_element);
+                            adminMenu.show();
+                        });
+
                     }
                     /* fin du menu */
 
@@ -305,6 +313,17 @@
                 xmlhttp.send(null);
                 
             }*/
+
+            class AdminMenu{
+                constructor(user, html_element){
+                    this.user = user;
+                    this.html_element = html_element;
+                }
+
+                show(){
+                    
+                }
+            }
         </script>
     </body>
 </html>
