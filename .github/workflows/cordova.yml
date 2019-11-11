@@ -19,9 +19,6 @@ jobs:
         phonegap platform add browser
       env:
         CI: true
-    - name: Tests
-      run : |
-        phonegap run browser
     - name: Release
       uses: toolmantim/release-drafter@v5.2.0
       env:
