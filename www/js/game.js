@@ -297,7 +297,8 @@ const request = function(path, options) {
     options = Object.assign({}, options, {
         headers: {
             'Content-type': 'application/json', // json by default because I use it on my API
-            Auth: sessionStorage.getItem('login') // the credential that are used.
+            Auth: sessionStorage.getItem('login'), // the credential that are used.
+            'Access-Control-Allow-Origin':'*'
         }
     });
     // Send the request with the real js fetch but with our modified arguments
