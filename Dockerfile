@@ -8,4 +8,4 @@ RUN phonegap platform add browser
 
 ENTRYPOINT [ "phonegap" ]
 
-CMD [ "serve" ]
+CMD [ "run browser" ]

@@ -41,7 +41,7 @@ loadClassManager.getClassList = async function(){
     let list = [];
     const url = new URL("profile/", __URL__);
     // TODO : charge the class from API
-    const response = await fetch(url.href);
+    const response = await request(url.href);
     const contentType = response.headers.get("content-type");
     if(contentType && contentType.indexOf("json") === -1)
         throw new Error("Return type is not JSON. Found "+ contentType);
@@ -65,7 +65,7 @@ Object.defineProperty(loadClassManager, 'url', {
 async function loadClass(name, apiName) {
     const url = new URL("profile/"+apiName, __URL__);
     // TODO : charge the class from API
-    const response = await fetch(url.href);
+    const response = await request(url.href);
     const contentType = response.headers.get("content-type");
     if(contentType && contentType.indexOf("json") === -1)
         throw new Error("Return type is not JSON. Found "+ contentType);

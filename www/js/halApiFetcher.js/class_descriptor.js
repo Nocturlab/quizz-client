@@ -307,8 +307,7 @@ function addStaticQuery(classObject, descriptor) {
         let url = new URL(api_name+"/search/"+descriptor.name, loadClassManager.url);
         classObject[descriptor.name] = async function(){
             return await request(url.href, {
-                method: 'GET',
-                credentials: 'include'
+                method: 'GET'
             }).then((response)=>{
                 return response.json();
             }).then(async (response)=>{
@@ -454,7 +453,7 @@ function addDeleteMethods(classObject, element){
     classObject.prototype.delete = async function(){
         let url = new URL(this.id);
         classObject._cacheData.delete(this.id);
-        return await request(url.href, {method: 'DELETE', credentials: 'include'}).then(async (response)=>{
+        return await request(url.href, {method: 'DELETE'}).then(async (response)=>{
             return await response.json();
         });
     };
