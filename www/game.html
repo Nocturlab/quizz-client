@@ -80,10 +80,19 @@
             href="css/material-components.min.css"
         />
         <script type="text/javascript" src="js/material-components.min.js"></script>
+
+        <script type="text/javascript" src="js/qrcode.js"></script>
+
+        <script src="js/halApiFetcher.js/string-utils.js"></script>
+        <script src="js/halApiFetcher.js/class_descriptor.js"></script>
+        <script src="js/halApiFetcher.js/class_manager.js"></script>
         
         <script type="text/javascript">
-            // const remote_url = new URL('http://game.nocturlab.fr');
-            const remote_url = new URL('http://quizz-client.nocturlab.fr:80/api/');
+            const remote_url = new URL('http://quizz.nocturlab.fr');
+            // const remote_url = new URL('http://192.168.43.25:80/api/');
+            // const remote_url = new URL('http://10.0.10.100:80/api/');
+
+            const ClassManager = new loadClassManager(remote_url+'v1/');
 
             var user = null;
             window.addEventListener('load', function(){
@@ -205,7 +214,9 @@
                             game.html_element.querySelector('.send-answer').addEventListener('click', function() {
                                 game.show_loader();
                                 const value = [];
-                                value.push(Date.now() - start_date);
+
+                                value.push(Math.floor((Date.now() - start_date)/1000));
+
                                 for (const answer of user_response) {
                                     value.push(answer);
                                 }
@@ -246,6 +257,294 @@
                             Administration
                         </span>`;
                         logout_button.appendChild(admin_button);
+
+
+                        admin_button.addEventListener('click', function() {
+                            game.html_element.innerHTML = ``;
+                            game.show_loader();
+
+                            /* Affichage de l'espace administrateur */
+
+                            // Affichage de la liste des questions
+                        var questionListEl = document.createElement('div');
+                        questionListEl.classList.add('mdc-data-table', 'question-list', 'mdc-card');
+                            
+                        Promise.all([ClassManager.Question, ClassManager.Category, ClassManager.Resultat, ClassManager.Resource, ClassManager.Answers]).then(async function([Question, Category, Resultat, Resource, Answers]){
+                            questionListContentEl = '';
+
+                            const questions = await Question.getAll();
+                            
+                            questionListEl.innerHTML = `<div class="mdc-data-table">
+<table class="mdc-data-table__table" aria-label="Questions">
+    <thead>
+    <tr class="mdc-data-table__header-row">
+        <th class="mdc-data-table__header-cell mdc-data-table__header-cell--checkbox" role="columnheader" scope="col">
+          <div class="mdc-checkbox mdc-data-table__header-row-checkbox mdc-checkbox--selected">
+            <input type="checkbox" class="mdc-checkbox__native-control" aria-label="Checkbox for header row selection"/>
+            <div class="mdc-checkbox__background">
+              <svg class="mdc-checkbox__checkmark" viewbox="0 0 24 24">
+                <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+              </svg>
+              <div class="mdc-checkbox__mixedmark"></div>
+            </div>
+          </div>
+        </th>
+        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Question</th>
+        <th class="mdc-data-table__header-cell mdc-data-table__header-cell--numeric" role="columnheader" scope="col">Difficulty</th>
+        <th class="mdc-data-table__header-cell mdc-data-table__header-cell--numeric" role="columnheader" scope="col">Nb Answers</th>
+        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Category</th>
+        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Creation date</th>
+        <th class="mdc-data-table__header-cell" role="columnheader" scope="col"><button class="mdc-button mdc-button--outlined mdc-ripple-upgraded delete">
+                <div class="mdc-button__ripple"></div>
+                <i class="material-icons mdc-button__icon" aria-hidden="true">delete</i>
+                <span class="mdc-button__label">Supprimer</span>
+            </button> <button class="mdc-button mdc-button--outlined mdc-ripple-upgraded create">
+                <div class="mdc-button__ripple"></div>
+                <i class="material-icons mdc-button__icon" aria-hidden="true">create</i>
+                <span class="mdc-button__label">Ajouter</span>
+            </button>
+        </th>
+    </tr>
+    </thead>
+    <tbody class="mdc-data-table__content">
+
+    </tbody>
+</table>
+</div>`;
+                            var questionListContentEl = questionListEl.querySelector('.mdc-data-table__content');
+                            for (const question of questions) {
+                                
+                                var questionEl = document.createElement('tr');
+                                questionEl.classList.add('mdc-data-table__row');
+                                questionEl.setAttribute('data-row-id', await question.id);
+                                questionEl.innerHTML = `<td class="mdc-data-table__cell mdc-data-table__cell--checkbox">
+          <div class="mdc-checkbox mdc-data-table__row-checkbox">
+            <input type="checkbox" class="mdc-checkbox__native-control" aria-labelledby="${await question.id}"/>
+            <div class="mdc-checkbox__background">
+              <svg class="mdc-checkbox__checkmark" viewbox="0 0 24 24">
+                <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+              </svg>
+              <div class="mdc-checkbox__mixedmark"></div>
+            </div>
+          </div>
+        </td>
+        <td class="mdc-data-table__cell">${await question.value}</td>
+        <td class="mdc-data-table__cell mdc-data-table__cell--numeric">${await question.difficulty}</td>
+        <td class="mdc-data-table__cell mdc-data-table__cell--numeric">${(await Resultat.get(question._params.userAnswers)).length}</td>
+        <td class="mdc-data-table__cell">${await (await question.category).name}</td>
+        <td class="mdc-data-table__cell">${await question.creationDate}</td>
+        <td class="mdc-data-table__cell"><button class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
+                <div class="mdc-button__ripple"></div>
+                <span class="mdc-button__label">Détail</span>
+            </button>
+        </td>`;
+                                const button = questionEl.querySelector('.mdc-button');
+                                const ripple = new mdc.ripple.MDCRipple(button);
+                                questionListContentEl.appendChild(questionEl);
+                            }
+                            game.html_element.appendChild(questionListEl);
+                            const button_delete = questionListEl.querySelector('.mdc-button.delete');
+                            button_delete.addEventListener('click', async function() {
+                                const rows = questionListContentEl.querySelectorAll('.mdc-data-table__row');
+                                for (const row of rows) {
+                                    if(row.querySelector('.mdc-data-table__row-checkbox > input').checked){
+                                        (await Question.get(row.getAttribute('data-row-id'))).delete().then(function(result) {
+                                            return result.json();
+                                        }).then(function(result) {
+                                            console.log(result);
+                                        }).catch(function(err) {
+                                            console.error(err);
+                                        });
+                                    }
+                                }
+                            });
+                            const ripple_delete = new mdc.ripple.MDCRipple(button_delete);
+
+                            const button_create = questionListEl.querySelector('.mdc-button.create');
+                            button_create.addEventListener('click', async function() {
+                                var question_info = {
+                                    value: null,
+                                    answers: [],
+                                    validAnswers: [],
+                                    resource: null,
+                                    category: null
+                                }
+                                game.html_element.innerHTML = ``;
+                                var form = document.createElement('div');
+                                form.classList.add('mdc-ctn', 'mdc-pnl');
+                                form.innerHTML = `<h6 class="mdc-list-group__subheader">Ajout d'une Question</h6>`;
+                                
+                                var input = document.createElement('div');
+                                input.innerHTML = `<div class="mdc-text-field mdc-text-field--outlined">
+    <input class="mdc-text-field__input" autocorrect="off" autocomplete="on" spellcheck="false" id="value-mdc-text-field" maxlength="524288" required>
+    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+        <div class="mdc-notched-outline__leading"></div>
+        <div class="mdc-notched-outline__notch">
+            <label for="value-mdc-text-field" class="mdc-floating-label" style=""><!---->Question<!----></label>
+        </div>
+        <div class="mdc-notched-outline__trailing"></div>
+    </div>
+</div>`;
+                                var input_mdc = new mdc.textField.MDCTextField(input.querySelector('.mdc-text-field'));
+                                form.appendChild(input);
+                                var input_select = document.createElement('div');
+                                select_options = ``;
+                                for (const category of await Category.getAll()) {
+                                    select_options+= `<li class="mdc-list-item" data-value="${await category.id}" aria-selected="true">${await category.name}</li>`;
+                                }
+                                input_select.innerHTML = `<div class="mdc-select mdc-select--outlined">
+  <div class="mdc-select__anchor">
+    <i class="mdc-select__dropdown-icon"></i>
+    <div class="mdc-select__selected-text"></div>
+    <span class="mdc-floating-label">Choisir une Catégorie</span>
+    <div class="mdc-line-ripple"></div>
+  </div>
+  <div class="mdc-select__menu mdc-menu mdc-menu-surface">
+    <ul class="mdc-list">
+      <li class="mdc-list-item mdc-list-item--selected" data-value="" aria-selected="true"></li>
+      ${select_options}
+    </ul>
+  </div>
+</div>`;
+                                input_select_mdc = new mdc.select.MDCSelect(input_select.querySelector('.mdc-select'));
+                                input_select_mdc.listen('MDCSelect:change', () => {
+                                    question_info.category = input_select_mdc.value;
+                                });
+                                form.appendChild(input_select);
+
+                                game.html_element.appendChild(form);
+
+                                var subtitle = document.createElement('h6');
+                                subtitle.classList.add('mdc-list-group__subheader');
+                                subtitle.innerText = `Sélection de la resources`;
+                                
+                                form = document.createElement('div');
+                                form.classList.add('mdc-list', 'mdc-ctn', 'mdc-pnl');
+                                form.appendChild(subtitle);
+
+                                game.html_element.appendChild(form);
+
+                                const createCardEl = function(parent_el, title, subtitle, desc, img, actions){
+                                    const answer_el = document.createElement('div');
+                                    answer_el.classList.add('card');
+                                    
+                                    if(!title)
+                                        title = '';
+                                    if(!subtitle)
+                                        subtitle = '';
+                                    if(!desc)
+                                        desc = '';
+                                    if(!img)
+                                        img = '&quot;data:image/svg+xml,%3Csvg%20width%3D%22344%22%20height%3D%22194%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%3E%3Cdefs%3E%3Cpath%20id%3D%22a%22%20d%3D%22M-1%200h344v194H-1z%22%2F%3E%3C%2Fdefs%3E%3Cg%20transform%3D%22translate(1)%22%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cmask%20id%3D%22b%22%20fill%3D%22%23fff%22%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%2F%3E%3C%2Fmask%3E%3Cuse%20fill%3D%22%23BDBDBD%22%20xlink%3Ahref%3D%22%23a%22%2F%3E%3Cg%20mask%3D%22url(%23b)%22%3E%3Cpath%20d%3D%22M173.65%2069.238L198.138%2027%20248%20112.878h-49.3c.008.348.011.697.011%201.046%200%2028.915-23.44%2052.356-52.355%2052.356C117.44%20166.28%2094%20142.84%2094%20113.924c0-28.915%2023.44-52.355%2052.356-52.355%2010%200%2019.347%202.804%2027.294%207.669zm0%200l-25.3%2043.64h50.35c-.361-18.478-10.296-34.61-25.05-43.64z%22%20fill%3D%22%23757575%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E&quot;';
+                                    
+                                    answer_el.innerHTML = `<div class="mdc-card">
+    <div class="mdc-card__media mdc-card__media--16-9" style="background:url(${img});background-repeat: no-repeat; background-position: center; background-size: contain;"></div>
+    <div class="mdc-card-wrapper__text-section">
+        <div class="mdc-card__title">${title}</div>
+        <div class="mdc-card__subhead">${subtitle}</div>
+    </div>
+    <div class="mdc-card-wrapper__text-section">
+        <div class="mdc-card__supporting-text">
+            ${desc}
+        </div>
+    </div>
+    <div class="mdc-card__actions">
+    </div>
+</div>`;
+                                    if(actions){
+                                        if(actions instanceof Object)
+                                            answer_el.querySelector('.mdc-card__actions').appendChild(actions);
+                                        else{
+                                            var el = document.createElement('div');
+                                            el.innerHTML = actions;
+                                            answer_el.querySelector('.mdc-card__actions').appendChild(el);
+                                        }
+
+                                    }
+                                    parent_el.appendChild(answer_el);
+                                }
+
+
+                                var card_ctn = document.createElement('div');
+                                card_ctn.classList.add('mdc-ctn');
+                                for (const resource of await Resource.getAll()) {
+                                    const btn_ctn = document.createElement('div');
+                                    btn_ctn.innerHTML = `<button class="mdc-button mdc-card__action mdc-card__action--button mdc-ripple-upgraded select-btn" style="--mdc-ripple-fg-size:52px; --mdc-ripple-fg-scale:2.01408; --mdc-ripple-fg-translate-start:34.5px, -1.75px; --mdc-ripple-fg-translate-end:17.8125px, -8px;">
+        <span class="mdc-button__label">Action 1</span>
+        <div class="mdc-button__ripple"></div>
+    </button>`;                     
+                                    btn_ctn.querySelector('.select-btn').addEventListener('click', async function() {
+                                        question_info.resource = await resource.id
+                                    });
+                                    qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+                                    const qr = qrcode(12, 'L');
+                                    qr.addData(await resource.name, 'Byte');
+                                    qr.make();
+                                    createCardEl(card_ctn, await resource.name, await resource.author, await resource.summary, qr.createDataURL(16), btn_ctn);
+                                }
+
+                                game.html_element.appendChild(card_ctn);
+                                
+                                form = document.createElement('div');
+                                form.classList.add('mdc-ctn', 'mdc-pnl');
+                                form.innerHTML = `<h6 class="mdc-list-group__subheader">Sélection des réponses</h6>`;
+
+                                game.html_element.appendChild(form);
+
+                                var card_ctn = document.createElement('div');
+                                card_ctn.classList.add('mdc-ctn');
+                                for (const answer of await Answers.getAll()) {
+                                    question_info.answers.push(await answer.id);
+                                    const btn_ctn = document.createElement('div');
+                                    btn_ctn.innerHTML = `<button class="mdc-button mdc-card__action mdc-card__action--button mdc-ripple-upgraded select-btn" style="--mdc-ripple-fg-size:52px; --mdc-ripple-fg-scale:2.01408; --mdc-ripple-fg-translate-start:34.5px, -1.75px; --mdc-ripple-fg-translate-end:17.8125px, -8px;">
+        <span class="mdc-button__label">Action 1</span>
+        <div class="mdc-button__ripple"></div>
+    </button>`;                     
+                                    btn_ctn.querySelector('.select-btn').addEventListener('click', async function() {
+                                        if(question_info.validAnswers.includes(await answer.id))
+                                            question_info.validAnswers.splice(question_info.validAnswers.indexOf(await answer.id));
+                                        else
+                                            question_info.validAnswers.push(await answer.id);
+                                        console.log(question_info);
+                                    });
+                                    qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+                                    const qr = qrcode(4, 'L');
+                                    qr.addData(await answer.value, 'Byte');
+                                    qr.make();
+                                    createCardEl(card_ctn, await answer.value, null, null, qr.createDataURL(16), btn_ctn);
+                                }
+                                game.html_element.appendChild(card_ctn);
+                                const send_btn = document.createElement('button');
+                                send_btn.classList.add('send-answer', 'mdc-fab');
+                                send_btn.setAttribute('aria-label', 'Envoyer');
+                                send_btn.innerHTML = `<div class="mdc-fab__ripple"></div><span class="mdc-fab__icon material-icons">send</span>`;
+                                const sendRipple = new mdc.ripple.MDCRipple(send_btn);
+                                send_btn.addEventListener('click', function() {
+                                    question_info.value = input_mdc.value;
+                                    console.log(question_info);
+                                    request(game.remote_url+'/v1/questions', {
+                                        method: 'POST',
+                                        body: JSON.stringify(question_info)
+                                    }).then(function(result) {
+                                            return result.json();
+                                    }).then(function(result) {
+                                        console.log(result);
+                                    }).catch(function(err) {
+                                        console.error(err);
+                                    });
+                                });
+                                game.html_element.appendChild(send_btn);
+                                game.hide_loader();
+                            });
+                            const ripple_create = new mdc.ripple.MDCRipple(button_create);
+                            const questionsDataTable = new mdc.dataTable.MDCDataTable(questionListEl);
+                            game.hide_loader();
+                        }).catch(function(err) {
+                            console.error(err);
+                        });
+                            /* Fin de l'espace administrateur */
+                        });
+
                     }
                     /* fin du menu */
 
@@ -259,52 +558,14 @@
                     drawer.open = false;
                     window.location.href = 'index.html';
                 });
+
             });
-            /*
-            function scan(){
-                console.log("clicked");
-                cordova.plugins.barcodeScanner.scan(function(result){
-                    var url = "questions/reponse.txt";
-                    xmlhttp.onreadystatechange = function () {
-                        if (xmlhttp.readyState == 4 || xmlhttp.readyState == "complete") {
-                            if (xmlhttp.responseText==result.text){
-                                reponse.appendChild(document.createTextNode(result.text));
-                                alert("Bonne reponse");
-                            }else
-                            alert("Mauvaise reponse");
-                        }
-                    }
-                    xmlhttp.open("GET", url, true);
-                    xmlhttp.send(null);
-                },function(error){
-                    //error callback
-                    alert(JSON.stringify(error));
-                }
-                
-                );
-            }
-            
-            // Fonction lancée au début du jeu : connexion à une partie
-            // Chargement de la question et affichage
-            function rejoindre() {
-                if (arguments.callee.done) return;
-                arguments.callee.done = true;
-                
-                var question = document.getElementById("question");
-                if (window.XMLHttpRequest) {
-                    xmlhttp = new XMLHttpRequest();
-                }
-                
-                var url = "questions/question.txt";
-                xmlhttp.onreadystatechange = function () {
-                    if (xmlhttp.readyState == 4 || xmlhttp.readyState == "complete") {
-                        question.appendChild(document.createTextNode(xmlhttp.responseText));
-                    }
-                }
-                xmlhttp.open("GET", url, true);
-                xmlhttp.send(null);
-                
-            }*/
         </script>
+      
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="css/material-custom.css"
+        />
     </body>
 </html>
