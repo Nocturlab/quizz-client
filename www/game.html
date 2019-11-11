@@ -80,6 +80,7 @@
             href="css/material-components.min.css"
         />
         <script type="text/javascript" src="js/material-components.min.js"></script>
+
         <script type="text/javascript" src="js/qrcode.js"></script>
 
         <script src="js/halApiFetcher.js/string-utils.js"></script>
@@ -213,7 +214,9 @@
                             game.html_element.querySelector('.send-answer').addEventListener('click', function() {
                                 game.show_loader();
                                 const value = [];
+
                                 value.push(Math.floor((Date.now() - start_date)/1000));
+
                                 for (const answer of user_response) {
                                     value.push(answer);
                                 }
@@ -254,6 +257,7 @@
                             Administration
                         </span>`;
                         logout_button.appendChild(admin_button);
+
 
                         admin_button.addEventListener('click', function() {
                             game.html_element.innerHTML = ``;
@@ -540,6 +544,7 @@
                         });
                             /* Fin de l'espace administrateur */
                         });
+
                     }
                     /* fin du menu */
 
@@ -555,51 +560,6 @@
                 });
 
             });
-            /*
-            function scan(){
-                console.log("clicked");
-                cordova.plugins.barcodeScanner.scan(function(result){
-                    var url = "questions/reponse.txt";
-                    xmlhttp.onreadystatechange = function () {
-                        if (xmlhttp.readyState == 4 || xmlhttp.readyState == "complete") {
-                            if (xmlhttp.responseText==result.text){
-                                reponse.appendChild(document.createTextNode(result.text));
-                                alert("Bonne reponse");
-                            }else
-                            alert("Mauvaise reponse");
-                        }
-                    }
-                    xmlhttp.open("GET", url, true);
-                    xmlhttp.send(null);
-                },function(error){
-                    //error callback
-                    alert(JSON.stringify(error));
-                }
-                
-                );
-            }
-            
-            // Fonction lancée au début du jeu : connexion à une partie
-            // Chargement de la question et affichage
-            function rejoindre() {
-                if (arguments.callee.done) return;
-                arguments.callee.done = true;
-                
-                var question = document.getElementById("question");
-                if (window.XMLHttpRequest) {
-                    xmlhttp = new XMLHttpRequest();
-                }
-                
-                var url = "questions/question.txt";
-                xmlhttp.onreadystatechange = function () {
-                    if (xmlhttp.readyState == 4 || xmlhttp.readyState == "complete") {
-                        question.appendChild(document.createTextNode(xmlhttp.responseText));
-                    }
-                }
-                xmlhttp.open("GET", url, true);
-                xmlhttp.send(null);
-                
-            }*/
         </script>
       
         <link
